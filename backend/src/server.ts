@@ -35,8 +35,17 @@ async function startServer(): Promise<void> {
   const userService = createMongoUserService(client.db().collection<UserDocument>('users'));
   try {
     await userService.ensureIndexes();
-  } catch {
-    throw new Error('Unable to initialize the users collection email index.');
+  } catch (error) {
+    await closeClientAfterIndexFailure(client);
+    throw new Error('Unable to initialize the users collection email index.', { cause: error });
+  }
+  try {
+    await projectService.ensureIndexes();
+  } catch (error) {
+    await closeClientAfterIndexFailure(client);
+    throw new Error('Unable to initialize the projects collection owner/date index.', {
+      cause: error
+    });
   }
   const authService = createAuthService(userService, process.env.JWT_SECRET);
   const app = createApp(
@@ -49,6 +58,14 @@ async function startServer(): Promise<void> {
   app.listen(port, () => {
     console.log(`WorkSphere API is listening on port ${port}`);
   });
+}
+
+async function closeClientAfterIndexFailure(client: Awaited<ReturnType<typeof connectToDatabase>>) {
+  try {
+    await client.close();
+  } catch {
+    console.error('Unable to close MongoDB after index initialization failed.');
+  }
 }
 
 void startServer().catch((error: unknown) => {

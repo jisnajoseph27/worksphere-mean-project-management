@@ -7,6 +7,7 @@ import {
 } from '../models/project';
 
 export interface ProjectService {
+  ensureIndexes(): Promise<void>;
   create(input: ProjectInput, ownerId: ObjectId): Promise<ProjectDocument>;
   list(ownerId: ObjectId, pagination: ProjectPagination): Promise<ProjectPage>;
   findById(id: ObjectId, ownerId: ObjectId): Promise<ProjectDocument | null>;
@@ -18,6 +19,10 @@ export function createMongoProjectService(
   collection: Collection<ProjectDocument>
 ): ProjectService {
   return {
+    async ensureIndexes() {
+      await collection.createIndex({ ownerId: 1, createdAt: -1 });
+    },
+
     async create(input, ownerId) {
       const now = new Date();
       const project: ProjectDocument = {

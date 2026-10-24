@@ -1,0 +1,43 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/dashboard" aria-label="WorkSphere home">
+      <span class="brand-mark" aria-hidden="true">W</span>
+      <span>WorkSphere</span>
+    </a>
+
+    <div class="sidebar-label">Workspace</div>
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon" aria-hidden="true">▦</span>
+        <span>Overview</span>
+      </a>
+      <a routerLink="/login" routerLinkActive="active">
+        <span class="nav-icon" aria-hidden="true">↪</span>
+        <span>Sign in</span>
+      </a>
+      <a routerLink="/register" routerLinkActive="active">
+        <span class="nav-icon" aria-hidden="true">＋</span>
+        <span>Create account</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span>Workspace ready</span>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">YOUR WORKSPACE</p>
+        <p class="topbar-title">Plan clearly. Build together.</p>
+      </div>
+      <span class="avatar" aria-label="Guest account">G</span>
+    </header>
+
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

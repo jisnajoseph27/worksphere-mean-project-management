@@ -39,6 +39,7 @@ const project: ProjectDocument = {
 
 function createProjectService(overrides: Partial<ProjectService> = {}): ProjectService {
   return {
+    ensureIndexes: vi.fn(async () => {}),
     create: vi.fn(async () => project),
     list: vi.fn(async (_ownerId, { limit, skip }) => ({
       projects: [project],
@@ -97,8 +98,19 @@ describe('Projects API', () => {
       .set('Authorization', `Bearer ${testToken}`);
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({ total: 1, limit: 20, skip: 0 });
-    expect(projectService.list).toHaveBeenCalledWith(testUserId, { limit: 20, skip: 0 });
+    expect(response.body).toMatchObject({ total: 1, limit: 10, skip: 0 });
+    expect(projectService.list).toHaveBeenCalledWith(testUserId, { limit: 10, skip: 0 });
+  });
+
+  it('preserves explicitly requested pagination values', async () => {
+    const projectService = createProjectService();
+    const response = await request(createTestApp(projectService))
+      .get('/api/projects?limit=25&skip=10')
+      .set('Authorization', `Bearer ${testToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ total: 1, limit: 25, skip: 10 });
+    expect(projectService.list).toHaveBeenCalledWith(testUserId, { limit: 25, skip: 10 });
   });
 
   it('gets one project by a valid ObjectId', async () => {

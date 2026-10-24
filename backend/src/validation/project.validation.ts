@@ -120,7 +120,7 @@ export function parseProjectPagination(query: {
   limit?: unknown;
   skip?: unknown;
 }): ProjectPagination {
-  const limit = parseQueryInteger(query.limit, 20, 'limit');
+  const limit = parseQueryInteger(query.limit, 10, 'limit');
   const skip = parseQueryInteger(query.skip, 0, 'skip');
 
   if (limit < 1 || limit > 100) {

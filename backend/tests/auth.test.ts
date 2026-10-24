@@ -38,6 +38,7 @@ function createUserService(overrides: Partial<UserService> = {}): UserService {
 }
 
 const projectService: ProjectService = {
+  ensureIndexes: async () => {},
   create: async () => {
     throw new Error('Not used in authentication tests.');
   },
