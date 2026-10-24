@@ -3,6 +3,9 @@ import { checkDatabaseReadiness, connectToDatabase } from './config/database';
 import { createApp } from './app';
 import { ProjectDocument } from './models/project';
 import { createMongoProjectService } from './services/project.service';
+import { UserDocument } from './models/user';
+import { createMongoUserService } from './services/user.service';
+import { createAuthService, validateJwtSecret } from './services/auth.service';
 
 const port = Number(process.env.PORT ?? 3000);
 
@@ -11,6 +14,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 }
 
 async function startServer(): Promise<void> {
+  validateJwtSecret(process.env.JWT_SECRET);
   const connectionString = process.env.MONGODB_URI;
 
   if (!connectionString) {
@@ -28,7 +32,19 @@ async function startServer(): Promise<void> {
   const projectService = createMongoProjectService(
     client.db().collection<ProjectDocument>('projects')
   );
-  const app = createApp(() => checkDatabaseReadiness(client), projectService);
+  const userService = createMongoUserService(client.db().collection<UserDocument>('users'));
+  try {
+    await userService.ensureIndexes();
+  } catch {
+    throw new Error('Unable to initialize the users collection email index.');
+  }
+  const authService = createAuthService(userService, process.env.JWT_SECRET);
+  const app = createApp(
+    () => checkDatabaseReadiness(client),
+    projectService,
+    authService,
+    process.env.JWT_SECRET
+  );
 
   app.listen(port, () => {
     console.log(`WorkSphere API is listening on port ${port}`);

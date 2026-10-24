@@ -6,6 +6,18 @@ import {
   parseProjectPagination,
   ProjectValidationError
 } from '../validation/project.validation';
+import { ObjectId } from 'mongodb';
+
+function getUserId(
+  request: Parameters<RequestHandler>[0],
+  response: Parameters<RequestHandler>[1]
+): ObjectId | null {
+  if (!request.userId) {
+    response.status(401).json({ error: 'Unauthorized.' });
+    return null;
+  }
+  return request.userId;
+}
 
 function sendError(response: Parameters<RequestHandler>[1], error: unknown): void {
   if (error instanceof ProjectValidationError) {
@@ -19,8 +31,10 @@ function sendError(response: Parameters<RequestHandler>[1], error: unknown): voi
 export function createProjectController(projectService: ProjectService) {
   const create: RequestHandler = async (request, response) => {
     try {
+      const ownerId = getUserId(request, response);
+      if (!ownerId) return;
       const input = parseProjectInput(request.body);
-      const project = await projectService.create(input);
+      const project = await projectService.create(input, ownerId);
       response.status(201).json(project);
     } catch (error) {
       sendError(response, error);
@@ -29,8 +43,10 @@ export function createProjectController(projectService: ProjectService) {
 
   const list: RequestHandler = async (request, response) => {
     try {
+      const ownerId = getUserId(request, response);
+      if (!ownerId) return;
       const pagination = parseProjectPagination(request.query);
-      const page = await projectService.list(pagination);
+      const page = await projectService.list(ownerId, pagination);
       response.status(200).json(page);
     } catch (error) {
       sendError(response, error);
@@ -39,8 +55,10 @@ export function createProjectController(projectService: ProjectService) {
 
   const getById: RequestHandler = async (request, response) => {
     try {
+      const ownerId = getUserId(request, response);
+      if (!ownerId) return;
       const id = parseProjectId(request.params.projectId);
-      const project = await projectService.findById(id);
+      const project = await projectService.findById(id, ownerId);
       if (!project) {
         response.status(404).json({ error: 'Project not found.' });
         return;
@@ -54,9 +72,11 @@ export function createProjectController(projectService: ProjectService) {
 
   const update: RequestHandler = async (request, response) => {
     try {
+      const ownerId = getUserId(request, response);
+      if (!ownerId) return;
       const id = parseProjectId(request.params.projectId);
       const input = parseProjectInput(request.body);
-      const project = await projectService.update(id, input);
+      const project = await projectService.update(id, ownerId, input);
       if (!project) {
         response.status(404).json({ error: 'Project not found.' });
         return;
@@ -70,8 +90,10 @@ export function createProjectController(projectService: ProjectService) {
 
   const remove: RequestHandler = async (request, response) => {
     try {
+      const ownerId = getUserId(request, response);
+      if (!ownerId) return;
       const id = parseProjectId(request.params.projectId);
-      const deleted = await projectService.delete(id);
+      const deleted = await projectService.delete(id, ownerId);
       if (!deleted) {
         response.status(404).json({ error: 'Project not found.' });
         return;
