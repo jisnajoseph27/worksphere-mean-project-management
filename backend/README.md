@@ -48,9 +48,27 @@ Invoke-RestMethod http://localhost:3000/api/ready
 
 This endpoint returns HTTP 200 when the database ping succeeds and HTTP 503 when MongoDB is unavailable.
 
+## Projects API (local development only)
+
+The unauthenticated Projects API is for local development only. **Do not expose it publicly or deploy it for public access before authentication and authorization are implemented.** Until then, any caller who can reach the API can list, create, update, or delete projects.
+
+Projects are stored in MongoDB's `projects` collection with a generated `_id`, `name`, `description`, `status`, optional `startDate` and `dueDate`, `createdAt`, and `updatedAt`. `ownerId` is kept as `null` and `memberIds` as an empty array until authenticated ownership and membership are implemented. Requests cannot set either field. Status values are `planning`, `active`, `on-hold`, and `completed`; provided dates must be ISO date-time values with a timezone, and the due date cannot precede the start date.
+
+Available routes:
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| `POST` | `/api/projects` | Create a project; responds `201`. |
+| `GET` | `/api/projects` | List projects. Supports `limit` (default `20`, maximum `100`) and `skip` (default `0`). |
+| `GET` | `/api/projects/:projectId` | Get a project by MongoDB ObjectId. |
+| `PUT` | `/api/projects/:projectId` | Replace editable project fields; requires `name`, `description`, and `status`. |
+| `DELETE` | `/api/projects/:projectId` | Delete a project; responds `204` when deleted. |
+
+Invalid input returns `400`, missing projects return `404`, and unexpected database errors return a generic `500` response.
+
 ## Backend request structure
 
-API requests are mounted by the app and directed through route files to controllers. Controllers handle HTTP status codes and JSON responses; services contain reusable application checks such as database readiness. The health and readiness endpoints use this flow while keeping the database check injectable for tests.
+API requests are mounted by the app and directed through route files to controllers. Controllers handle HTTP status codes and JSON responses; services contain application and database operations. Health checks and project operations are injected into the app so automated API tests can use mocks without a live MongoDB connection.
 
 ## Test and build
 

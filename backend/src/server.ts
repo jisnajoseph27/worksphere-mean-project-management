@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { checkDatabaseReadiness, connectToDatabase } from './config/database';
 import { createApp } from './app';
+import { ProjectDocument } from './models/project';
+import { createMongoProjectService } from './services/project.service';
 
 const port = Number(process.env.PORT ?? 3000);
 
@@ -23,7 +25,10 @@ async function startServer(): Promise<void> {
     throw new Error('MongoDB connection failed. Ensure MongoDB is running locally and MONGODB_URI is correct.');
   }
 
-  const app = createApp(() => checkDatabaseReadiness(client));
+  const projectService = createMongoProjectService(
+    client.db().collection<ProjectDocument>('projects')
+  );
+  const app = createApp(() => checkDatabaseReadiness(client), projectService);
 
   app.listen(port, () => {
     console.log(`WorkSphere API is listening on port ${port}`);
