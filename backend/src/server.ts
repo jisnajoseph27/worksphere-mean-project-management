@@ -1,0 +1,36 @@
+import 'dotenv/config';
+import { checkDatabaseReadiness, connectToDatabase } from './config/database';
+import { createApp } from './app';
+
+const port = Number(process.env.PORT ?? 3000);
+
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  throw new Error('PORT must be an integer between 1 and 65535');
+}
+
+async function startServer(): Promise<void> {
+  const connectionString = process.env.MONGODB_URI;
+
+  if (!connectionString) {
+    throw new Error('MONGODB_URI is required. Copy .env.example to .env and set the local MongoDB URI.');
+  }
+
+  let client;
+
+  try {
+    client = await connectToDatabase(connectionString);
+  } catch {
+    throw new Error('MongoDB connection failed. Ensure MongoDB is running locally and MONGODB_URI is correct.');
+  }
+
+  const app = createApp(() => checkDatabaseReadiness(client));
+
+  app.listen(port, () => {
+    console.log(`WorkSphere API is listening on port ${port}`);
+  });
+}
+
+void startServer().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : 'Unable to start WorkSphere API.');
+  process.exitCode = 1;
+});
