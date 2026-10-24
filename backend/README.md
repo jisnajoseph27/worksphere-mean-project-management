@@ -48,6 +48,10 @@ Invoke-RestMethod http://localhost:3000/api/ready
 
 This endpoint returns HTTP 200 when the database ping succeeds and HTTP 503 when MongoDB is unavailable.
 
+## Backend request structure
+
+API requests are mounted by the app and directed through route files to controllers. Controllers handle HTTP status codes and JSON responses; services contain reusable application checks such as database readiness. The health and readiness endpoints use this flow while keeping the database check injectable for tests.
+
 ## Test and build
 
 Run the automated tests:
