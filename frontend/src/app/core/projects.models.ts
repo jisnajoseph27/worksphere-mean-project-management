@@ -1,5 +1,13 @@
 export type ProjectStatus = 'planning' | 'active' | 'on-hold' | 'completed';
 
+export interface ProjectInput {
+  name: string;
+  description: string;
+  status: ProjectStatus;
+  startDate?: string;
+  dueDate?: string;
+}
+
 export interface Project {
   _id: string;
   name: string;
