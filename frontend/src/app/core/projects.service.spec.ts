@@ -63,6 +63,32 @@ describe('ProjectsService', () => {
     expect(result).toEqual(response);
   });
 
+  it('requests and returns a project by ID', () => {
+    const projectId = '507f1f77bcf86cd799439011';
+    const response: Project = {
+      _id: projectId,
+      name: 'WorkSphere',
+      description: 'Project management app',
+      status: 'active',
+      ownerId: '507f1f77bcf86cd799439012',
+      memberIds: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      startDate: '2026-01-01T00:00:00.000Z',
+      dueDate: '2026-02-01T00:00:00.000Z'
+    };
+    let result: Project | undefined;
+
+    projectsService.getProject(projectId).subscribe((project) => (result = project));
+    const request = httpTesting.expectOne(`/api/projects/${projectId}`);
+
+    expect(request.request.method).toBe('GET');
+    expect(request.request.url).toBe(`/api/projects/${projectId}`);
+    request.flush(response);
+
+    expect(result).toEqual(response);
+  });
+
   it('creates a project with the complete input and returns the created project', () => {
     const input: ProjectInput = {
       name: 'WorkSphere',

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/auth.service';
 import { Project, ProjectInput, ProjectStatus } from '../../core/projects.models';
@@ -16,7 +16,7 @@ const projectDateRangeValidator: ValidatorFn = (control): ValidationErrors | nul
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule, RouterLink],
   template: `
     <section class="dashboard">
       <div class="heading-row">
@@ -190,6 +190,9 @@ const projectDateRangeValidator: ValidatorFn = (control): ValidationErrors | nul
                   @if (project.dueDate) {
                     <span class="due-date">Due {{ project.dueDate | date: 'mediumDate' }}</span>
                   }
+                  <a class="view-details-button" [routerLink]="['/projects', project._id]">
+                    View Details
+                  </a>
                   <button
                     class="edit-button"
                     type="button"
@@ -216,7 +219,7 @@ const projectDateRangeValidator: ValidatorFn = (control): ValidationErrors | nul
     .phase-badge, .project-count, .status-badge { white-space: nowrap; }
     .phase-badge, .project-count { padding: 8px 11px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: #68728a; font-size: 11px; font-weight: 600; }
     button { cursor: pointer; }
-    .logout-button, .cancel-button, .edit-button { border: 1px solid var(--line); background: var(--surface); }
+    .logout-button, .cancel-button, .edit-button, .view-details-button { border: 1px solid var(--line); background: var(--surface); }
     .logout-button, .cancel-button { color: #59647d; font-size: 11px; font-weight: 650; }
     .logout-button, .cancel-button, .new-project-button, .save-button, .retry-button { min-height: 36px; padding: 0 14px; border-radius: 8px; }
     .logout-button, .cancel-button, .edit-button { border-radius: 8px; }
@@ -278,6 +281,8 @@ const projectDateRangeValidator: ValidatorFn = (control): ValidationErrors | nul
     .status-badge { padding: 6px 9px; border-radius: 20px; background: #f1f2f7; color: #68728a; font-size: 10px; font-weight: 650; text-transform: capitalize; }
     .due-date { color: var(--muted); font-size: 11px; font-weight: 500; white-space: nowrap; }
     .edit-button { min-height: 30px; padding: 0 10px; border-radius: 7px; color: var(--brand); font-size: 11px; font-weight: 650; }
+    .view-details-button { display: inline-flex; min-height: 30px; align-items: center; padding: 0 10px; border-radius: 7px; color: var(--brand); font-size: 11px; font-weight: 650; text-decoration: none; white-space: nowrap; }
+    .view-details-button:hover { border-color: #ccd3e2; background: #f8f9fc; }
     .empty-state { padding: 54px 22px; }
     .empty-icon { width: 50px; height: 50px; border-radius: 15px; background: var(--brand-soft); color: var(--brand); font-size: 21px; }
     h3 { margin: 17px 0 6px; font-size: 15px; }
